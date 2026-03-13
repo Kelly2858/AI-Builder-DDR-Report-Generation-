@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDR Report Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 680px;
+            width: 100%;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header .logo {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+        .header h1 {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+        .header p {
+            color: #94a3b8;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        /* Form Card */
+        .card {
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 36px;
+            border: 1px solid #334155;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+
+        /* Upload Areas */
+        .upload-group {
+            margin-bottom: 24px;
+        }
+        .upload-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #cbd5e1;
+        }
+        .upload-area {
+            border: 2px dashed #475569;
+            border-radius: 12px;
+            padding: 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #0f172a;
+            position: relative;
+        }
+        .upload-area:hover {
+            border-color: #60a5fa;
+            background: rgba(96, 165, 250, 0.05);
+        }
+        .upload-area.has-file {
+            border-color: #34d399;
+            background: rgba(52, 211, 153, 0.05);
+        }
+        .upload-area .icon {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .upload-area .text {
+            font-size: 13px;
+            color: #94a3b8;
+        }
+        .upload-area .filename {
+            font-size: 14px;
+            font-weight: 600;
+            color: #34d399;
+            margin-top: 6px;
+        }
+        .upload-area input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            letter-spacing: 0.5px;
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        }
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Features */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 30px;
+        }
+        .feature {
+            text-align: center;
+            padding: 16px 8px;
+            background: #1e293b;
+            border-radius: 12px;
+            border: 1px solid #334155;
+        }
+        .feature .feat-icon { font-size: 24px; margin-bottom: 6px; }
+        .feature .feat-label { font-size: 11px; color: #94a3b8; }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 12px;
+            color: #475569;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🏗️</div>
+            <h1>DDR Report Generator</h1>
+            <p>Upload your inspection and thermal reports to generate<br>a professional Detailed Diagnostic Report</p>
+        </div>
+
+        <div class="card">
+            <form action="/generate" method="POST" enctype="multipart/form-data" id="uploadForm">
+                <div class="upload-group">
+                    <label>📋 Inspection Report (PDF)</label>
+                    <div class="upload-area" id="inspectionArea">
+                        <span class="icon">📄</span>
+                        <span class="text">Click or drag to upload inspection report</span>
+                        <span class="filename" id="inspectionName" style="display:none;"></span>
+                        <input type="file" name="inspection" accept=".pdf" required
+                               onchange="handleFile(this, 'inspectionArea', 'inspectionName')">
+                    </div>
+                </div>
+
+                <div class="upload-group">
+                    <label>🌡️ Thermal Report (PDF)</label>
+                    <div class="upload-area" id="thermalArea">
+                        <span class="icon">📄</span>
+                        <span class="text">Click or drag to upload thermal report</span>
+                        <span class="filename" id="thermalName" style="display:none;"></span>
+                        <input type="file" name="thermal" accept=".pdf" required
+                               onchange="handleFile(this, 'thermalArea', 'thermalName')">
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    🚀 Generate DDR Report
+                </button>
+            </form>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <div class="feat-icon">🤖</div>
+                <div class="feat-label">AI-Powered Analysis</div>
+            </div>
+            <div class="feature">
+                <div class="feat-icon">🔍</div>
+                <div class="feat-label">Smart Merging</div>
+            </div>
+            <div class="feature">
+                <div class="feat-icon">📊</div>
+                <div class="feat-label">Professional Reports</div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Powered by Google Gemini AI · Built with Python & Flask
+        </div>
+    </div>
+
+    <script>
+        function handleFile(input, areaId, nameId) {
+            const area = document.getElementById(areaId);
+            const nameEl = document.getElementById(nameId);
+            if (input.files.length > 0) {
+                area.classList.add('has-file');
+                nameEl.textContent = '✅ ' + input.files[0].name;
+                nameEl.style.display = 'block';
+            }
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', function() {
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Processing...';
+        });
+    </script>
+</body>
+</html>

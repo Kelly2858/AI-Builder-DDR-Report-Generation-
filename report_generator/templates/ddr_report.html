@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} — Detailed Diagnostic Report</title>
+    <style>
+        /* ═══ Reset & Base ═══ */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: #f8f9fa;
+            font-size: 14px;
+        }
+
+        /* ═══ Report Container ═══ */
+        .report {
+            max-width: 900px;
+            margin: 20px auto;
+            background: #fff;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        /* ═══ Header ═══ */
+        .report-header {
+            background: linear-gradient(135deg, #1a365d 0%, #2c5282 50%, #2b6cb0 100%);
+            color: #fff;
+            padding: 40px 50px;
+            text-align: center;
+        }
+        .report-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .report-header .subtitle {
+            font-size: 14px;
+            opacity: 0.85;
+            letter-spacing: 1px;
+        }
+        .report-header .report-meta {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        .report-header .meta-item {
+            background: rgba(255,255,255,0.15);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+        .meta-item strong { font-weight: 600; }
+
+        /* ═══ Body ═══ */
+        .report-body {
+            padding: 40px 50px;
+        }
+
+        /* ═══ Sections ═══ */
+        .section {
+            margin-bottom: 35px;
+            page-break-inside: avoid;
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #2c5282;
+        }
+        .section-number {
+            background: #2c5282;
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a365d;
+        }
+
+        /* ═══ Summary Cards ═══ */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .summary-card {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        .summary-card .count {
+            font-size: 28px;
+            font-weight: 800;
+            display: block;
+        }
+        .summary-card .label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #718096;
+            margin-top: 4px;
+        }
+        .severity-critical .count { color: #e53e3e; }
+        .severity-high .count { color: #ed8936; }
+        .severity-medium .count { color: #ecc94b; }
+        .severity-low .count { color: #48bb78; }
+        .severity-total .count { color: #2c5282; }
+
+        /* ═══ Property Info ═══ */
+        .property-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .info-item {
+            background: #f7fafc;
+            padding: 12px 16px;
+            border-radius: 6px;
+            border-left: 3px solid #2c5282;
+        }
+        .info-item .info-label {
+            font-size: 11px;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .info-item .info-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-top: 2px;
+        }
+
+        /* ═══ Area Observations ═══ */
+        .area-card {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid #2c5282;
+        }
+        .area-card h3 {
+            font-size: 17px;
+            color: #1a365d;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .area-card h3::before {
+            content: '📍';
+        }
+        .observation-type {
+            margin-bottom: 12px;
+        }
+        .observation-type h4 {
+            font-size: 13px;
+            color: #4a5568;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .observation-type p {
+            color: #2d3748;
+            line-height: 1.7;
+        }
+
+        /* ═══ Images ═══ */
+        .observation-images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 14px;
+        }
+        .obs-image {
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            max-width: 380px;
+        }
+        .obs-image img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        .obs-image .img-caption {
+            padding: 8px 12px;
+            font-size: 11px;
+            color: #718096;
+            background: #f7fafc;
+            border-top: 1px solid #e2e8f0;
+        }
+        .image-not-available {
+            background: #fef5e7;
+            border: 1px dashed #ed8936;
+            border-radius: 6px;
+            padding: 16px;
+            text-align: center;
+            color: #c05621;
+            font-style: italic;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        /* ═══ Root Causes ═══ */
+        .cause-card {
+            background: #fff5f5;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 14px;
+            border: 1px solid #fed7d7;
+            border-left: 4px solid #e53e3e;
+        }
+        .cause-card h4 {
+            color: #c53030;
+            margin-bottom: 8px;
+        }
+        .cause-card p { color: #2d3748; }
+        .cause-card .evidence {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #718096;
+            font-style: italic;
+        }
+        .affected-areas {
+            margin-top: 8px;
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .area-tag {
+            background: #e53e3e;
+            color: #fff;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+        }
+
+        /* ═══ Severity Table ═══ */
+        .severity-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .severity-table th {
+            background: #1a365d;
+            color: #fff;
+            padding: 10px 14px;
+            text-align: left;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .severity-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 13px;
+        }
+        .severity-table tr:nth-child(even) { background: #f7fafc; }
+        .severity-badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-critical { background: #fff5f5; color: #e53e3e; border: 1px solid #feb2b2; }
+        .badge-high { background: #fffaf0; color: #dd6b20; border: 1px solid #fbd38d; }
+        .badge-medium { background: #fffff0; color: #d69e2e; border: 1px solid #fefcbf; }
+        .badge-low { background: #f0fff4; color: #38a169; border: 1px solid #c6f6d5; }
+
+        /* ═══ Recommendations ═══ */
+        .recommendation {
+            background: #f0fff4;
+            border-radius: 8px;
+            padding: 18px;
+            margin-bottom: 12px;
+            border: 1px solid #c6f6d5;
+            border-left: 4px solid #38a169;
+        }
+        .recommendation.priority-immediate {
+            background: #fff5f5;
+            border-color: #fed7d7;
+            border-left-color: #e53e3e;
+        }
+        .recommendation.priority-short-term {
+            background: #fffaf0;
+            border-color: #feebc8;
+            border-left-color: #ed8936;
+        }
+        .recommendation h4 {
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+        .priority-tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+        .priority-immediate { background: #e53e3e; color: #fff; }
+        .priority-short-term { background: #ed8936; color: #fff; }
+        .priority-long-term { background: #48bb78; color: #fff; }
+
+        /* ═══ Notes & Missing ═══ */
+        .notes-list, .missing-list {
+            list-style: none;
+            padding: 0;
+        }
+        .notes-list li, .missing-list li {
+            padding: 10px 16px;
+            margin-bottom: 6px;
+            background: #f7fafc;
+            border-radius: 6px;
+            border-left: 3px solid #4299e1;
+            font-size: 13px;
+        }
+        .missing-list li {
+            border-left-color: #ed8936;
+            background: #fffaf0;
+        }
+
+        /* ═══ Conflicts ═══ */
+        .conflict-card {
+            background: #fffaf0;
+            border-radius: 8px;
+            padding: 18px;
+            margin-bottom: 12px;
+            border: 1px solid #feebc8;
+            border-left: 4px solid #ed8936;
+        }
+        .conflict-card h4 { color: #c05621; margin-bottom: 6px; }
+        .conflict-sources {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .conflict-source {
+            background: #fff;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+        .conflict-source strong {
+            display: block;
+            font-size: 11px;
+            color: #718096;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        /* ═══ Footer ═══ */
+        .report-footer {
+            background: #1a365d;
+            color: rgba(255,255,255,0.7);
+            padding: 24px 50px;
+            text-align: center;
+            font-size: 12px;
+        }
+        .report-footer .disclaimer {
+            margin-top: 8px;
+            font-style: italic;
+            font-size: 11px;
+            opacity: 0.7;
+        }
+
+        /* ═══ Print ═══ */
+        @media print {
+            body { background: #fff; }
+            .report { box-shadow: none; margin: 0; }
+            .section { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+<div class="report">
+    <!-- ═══ HEADER ═══ -->
+    <div class="report-header">
+        <h1>{{ title }}</h1>
+        <div class="subtitle">{{ company_name }}</div>
+        <div class="report-meta">
+            {% if summary.get('address') and summary.address != 'Not Available' %}
+            <div class="meta-item"><strong>Property:</strong> {{ summary.address }}</div>
+            {% endif %}
+            {% if summary.get('inspection_date') and summary.inspection_date != 'Not Available' %}
+            <div class="meta-item"><strong>Inspection Date:</strong> {{ summary.inspection_date }}</div>
+            {% endif %}
+            {% if summary.get('report_date') and summary.report_date != 'Not Available' %}
+            <div class="meta-item"><strong>Report Date:</strong> {{ summary.report_date }}</div>
+            {% endif %}
+            {% if summary.get('client_name') and summary.client_name != 'Not Available' %}
+            <div class="meta-item"><strong>Client:</strong> {{ summary.client_name }}</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="report-body">
+
+        <!-- ═══ 1. PROPERTY ISSUE SUMMARY ═══ -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-number">1</div>
+                <div class="section-title">Property Issue Summary</div>
+            </div>
+
+            <div class="summary-grid">
+                <div class="summary-card severity-total">
+                    <span class="count">{{ summary.get('total_issues_found', 'N/A') }}</span>
+                    <span class="label">Total Issues</span>
+                </div>
+                <div class="summary-card severity-critical">
+                    <span class="count">{{ summary.get('critical_count', 0) }}</span>
+                    <span class="label">Critical</span>
+                </div>
+                <div class="summary-card severity-high">
+                    <span class="count">{{ summary.get('high_count', 0) }}</span>
+                    <span class="label">High</span>
+                </div>
+                <div class="summary-card severity-medium">
+                    <span class="count">{{ summary.get('medium_count', 0) }}</span>
+                    <span class="label">Medium</span>
+                </div>
+                <div class="summary-card severity-low">
+                    <span class="count">{{ summary.get('low_count', 0) }}</span>
+                    <span class="label">Low</span>
+                </div>
+            </div>
+
+            <div class="property-info">
+                {% if summary.get('property_type') %}
+                <div class="info-item">
+                    <div class="info-label">Property Type</div>
+                    <div class="info-value">{{ summary.property_type }}</div>
+                </div>
+                {% endif %}
+                {% if summary.get('overall_condition') %}
+                <div class="info-item">
+                    <div class="info-label">Overall Condition</div>
+                    <div class="info-value">{{ summary.overall_condition }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ═══ 2. AREA-WISE OBSERVATIONS ═══ -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-number">2</div>
+                <div class="section-title">Area-wise Observations</div>
+            </div>
+
+            {% for area in areas %}
+            <div class="area-card">
+                <h3>{{ area.area_name }}</h3>
+
+                {% if area.get('visual_observations') %}
+                <div class="observation-type">
+                    <h4>🔍 Visual Observations</h4>
+                    <p>{{ area.visual_observations }}</p>
+                </div>
+                {% endif %}
+
+                {% if area.get('thermal_observations') %}
+                <div class="observation-type">
+                    <h4>🌡️ Thermal Observations</h4>
+                    <p>{{ area.thermal_observations }}</p>
+                </div>
+                {% endif %}
+
+                {% if area.get('combined_analysis') %}
+                <div class="observation-type">
+                    <h4>📊 Combined Analysis</h4>
+                    <p>{{ area.combined_analysis }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Images for this area -->
+                {% if area.get('matched_images') and area.matched_images | length > 0 %}
+                <div class="observation-images">
+                    {% for img in area.matched_images %}
+                    <div class="obs-image">
+                        <img src="{{ img.base64_data }}" alt="{{ img.caption }}" 
+                             style="max-width: {{ [img.width, 380] | min }}px;">
+                        <div class="img-caption">
+                            {{ img.caption }} 
+                            (Source: {{ img.source | capitalize }} Report, Page {{ img.page_number }})
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="image-not-available">📷 Image Not Available for this area</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            {% if areas | length == 0 %}
+            <p style="color: #718096; font-style: italic;">No area observations available.</p>
+            {% endif %}
+
+            <!-- Unmatched images -->
+            {% if unmatched_images and unmatched_images | length > 0 %}
+            <div class="area-card" style="border-left-color: #718096;">
+                <h3 style="color: #718096;">Additional Images from Reports</h3>
+                <div class="observation-images">
+                    {% for img in unmatched_images %}
+                    <div class="obs-image">
+                        <img src="{{ img.base64_data }}" alt="{{ img.caption }}"
+                             style="max-width: {{ [img.width, 380] | min }}px;">
+                        <div class="img-caption">
+                            {{ img.caption }}
+                            (Source: {{ img.source | capitalize }} Report, Page {{ img.page_number }})
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- ═══ 3. PROBABLE ROOT CAUSE ═══ -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-number">3</div>
+                <div class="section-title">Probable Root Cause</div>
+            </div>
+
+            {% for cause in root_causes %}
+            <div class="cause-card">
+                <h4>{{ cause.issue }}</h4>
+                <p><strong>Probable Cause:</strong> {{ cause.probable_cause }}</p>
+                {% if cause.get('supporting_evidence') %}
+                <p class="evidence">Evidence: {{ cause.supporting_evidence }}</p>
+                {% endif %}
+                {% if cause.get('affected_areas') %}
+                <div class="affected-areas">
+                    {% for area in cause.affected_areas %}
+                    <span class="area-tag">{{ area }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            {% if root_causes | length == 0 %}
+            <p style="color: #718096; font-style: italic;">Not Available</p>
+            {% endif %}
+        </div>
+
+        <!-- ═══ 4. SEVERITY ASSESSMENT ═══ -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-number">4</div>
+                <div class="section-title">Severity Assessment</div>
+            </div>
+
+            {% if severity_assessment | length > 0 %}
+            <table class="severity-table">
+                <thead>
+                    <tr>
+                        <th>Area</th>
+                        <th>Issue</th>
+                        <th>Severity</th>
+                        <th>Reasoning</th>
+                        <th>Source</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in severity_assessment %}
+                    <tr>
+                        <td>{{ item.get('area', 'N/A') }}</td>
+                        <td>{{ item.get('issue', 'N/A') }}</td>
+                        <td>
+                            {% set sev = item.get('severity', 'Medium') | lower %}
+                            <span class="severity-badge badge-{{ sev }}">{{ item.get('severity', 'N/A') }}</span>
+                        </td>
+                        <td>{{ item.get('reasoning', 'N/A') }}</td>
+                        <td>{{ item.get('source', 'N/A') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p style="color: #718096; font-style: italic;">Not Available</p>
+            {% endif %}
+        </div>
+
+        <!-- ═══ 5. RECOMMENDED ACTIONS ═══ -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-number">5</div>
+                <div class="section-title">Recommended Actions</div>
+            </div>
+
+            {% for rec in recommended_actions %}
+            {% set priority_class = rec.get('priority', 'long-term') | lower | replace(' ', '-') %}
+            <div class="recommendation priority-{{ priority_class }}">
+                <h4>
+                    <span class="priority-tag priority-{{ priority_class }}">{{ rec.get('priority', 'N/A') }}</span>
+                    {{ rec.get('area', '') }}
+                </h4>
+                <p><strong>Action:</strong> {{ rec.get('action', 'N/A') }}</p>
+                {% if rec.get('reason') %}
+                <p style="margin-top: 4px; font-size: 13px; color: #4a5568;">
+                    <strong>Reason:</strong> {{ rec.reason }}
+                </p>
+                {% endif %}
+                {% if rec.get('estimated_impact') %}
+                <p style="margin-top: 4px; font-size: 13px; color: #c53030;">
+                    <strong>If not addressed:</strong> {{ rec.estimated_impact }}
+                </p>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            {% if recommended_actions | length == 0 %}
+            <p style="color: #718096; font-style: italic;">Not Available</p>
+            {% endif %}
+        </div>
+
+        <!-- ═══ 6. ADDITIONAL NOTES ═══ -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-number">6</div>
+                <div class="section-title">Additional Notes</div>
+            </div>
+
+            {% if additional_notes | length > 0 %}
+            <ul class="notes-list">
+                {% for note in additional_notes %}
+                <li>{{ note }}</li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p style="color: #718096; font-style: italic;">No additional notes.</p>
+            {% endif %}
+        </div>
+
+        <!-- ═══ 7. MISSING OR UNCLEAR INFORMATION ═══ -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-number">7</div>
+                <div class="section-title">Missing or Unclear Information</div>
+            </div>
+
+            {% if missing_information | length > 0 %}
+            <ul class="missing-list">
+                {% for item in missing_information %}
+                <li>⚠️ {{ item }}</li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p style="color: #718096; font-style: italic;">All expected information was available in the provided reports.</p>
+            {% endif %}
+        </div>
+
+        <!-- ═══ DATA CONFLICTS (if any) ═══ -->
+        {% if data_conflicts | length > 0 %}
+        <div class="section">
+            <div class="section-header">
+                <div class="section-number">⚠️</div>
+                <div class="section-title">Data Conflicts Between Reports</div>
+            </div>
+
+            {% for conflict in data_conflicts %}
+            <div class="conflict-card">
+                <h4>{{ conflict.get('area', 'Unknown Area') }} — {{ conflict.get('conflict', '') }}</h4>
+                <div class="conflict-sources">
+                    <div class="conflict-source">
+                        <strong>Inspection Report</strong>
+                        {{ conflict.get('source_1', 'N/A') }}
+                    </div>
+                    <div class="conflict-source">
+                        <strong>Thermal Report</strong>
+                        {{ conflict.get('source_2', 'N/A') }}
+                    </div>
+                </div>
+                {% if conflict.get('resolution_note') %}
+                <p style="margin-top: 10px; font-size: 13px; color: #744210;">
+                    <strong>Resolution:</strong> {{ conflict.resolution_note }}
+                </p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- ═══ FOOTER ═══ -->
+    <div class="report-footer">
+        <p>{{ company_name }} — {{ title }}</p>
+        <p class="disclaimer">
+            This report is based on the inspection and thermal data provided. 
+            Findings are limited to the information available at the time of analysis.
+            This report should be used in conjunction with professional engineering advice.
+        </p>
+    </div>
+</div>
+</body>
+</html>
