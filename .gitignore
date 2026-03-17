@@ -31,4 +31,12 @@ dist/
 
 # OS files
 .DS_Store
-Thumbs.db
+Thumbs.dboutput/*.html
+output/*.png
+output/*.jpg
+output/*.jpeg
+output/**/*.png
+output/**/*.jpg
+output/**/*.jpeg
+output/**/*.html
+output/
